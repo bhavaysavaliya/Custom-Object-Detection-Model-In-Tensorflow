@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 
-# gives starting position of grid
 def grid_starting_position(grid_no,total_grids):
     grid_h,grid_w=grid_no
     if grid_w>total_grids or grid_h>total_grids:
@@ -37,5 +36,34 @@ def convert_to_yolo_bbox_format(yolo_box,image_size,anchor_box_size,total_grids)
 def final_yolo_output_for_an_anchor(total_classes,yolo_box,image_size,anchor_box_size,total_grids):
     bbox = convert_to_yolo_bbox_format(yolo_box=yolo_box,image_size=image_size,anchor_box_size=anchor_box_size,total_grids=total_grids)
     class_prob = np.zeros(total_classes)
-    class_prob[yolo_box[0]]=1.0
+    class_prob[int(yolo_box[0])]=1.0
     return tf.concat([tf.constant([1], dtype=tf.float32),bbox,tf.constant(class_prob, dtype=tf.float32)], axis=0)
+
+def read_yolo_box_from_txt_file(path):
+    numbers_list = []
+    with open(path, 'r') as file:
+        for line in file:
+            numbers = list(map(float, line.strip().split()))
+            numbers_list.append(numbers)
+    return numbers_list
+
+@tf.function
+def get_final_output_for_an_image_per_grid_shape(path, total_classes, image_size, anchors, total_grids):
+    output = tf.zeros(shape=(total_grids, total_grids, (5 + total_classes) * len(anchors)), dtype=tf.float32)
+    yolo_box = read_yolo_box_from_txt_file(path=path)
+    for box in yolo_box:
+        a, b = find_grid_no(yolo_x_and_y=box[1:3], total_grids=total_grids)
+        op = []
+        for anchor in anchors:
+            op.append(final_yolo_output_for_an_anchor(
+                total_classes=total_classes,
+                yolo_box=box,
+                image_size=image_size,
+                anchor_box_size=anchor,
+                total_grids=total_grids
+            ))
+
+        updates = tf.expand_dims(tf.concat(op, axis=-1), axis=0)
+        indices = tf.expand_dims(tf.convert_to_tensor([a, b]), axis=0)
+        output = tf.tensor_scatter_nd_update(output, indices, updates)
+    return output
