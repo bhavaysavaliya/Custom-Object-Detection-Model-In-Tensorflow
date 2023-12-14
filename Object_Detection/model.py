@@ -1,5 +1,5 @@
 import tensorflow as tf
-from Layers.layer import *
+from .layer import *
 from keras.layers import Input,UpSampling2D
 from keras.models import Model,load_model
 
