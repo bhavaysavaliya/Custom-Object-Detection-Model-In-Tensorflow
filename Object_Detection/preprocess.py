@@ -93,28 +93,20 @@ def get_x(path,image_size):
 
 def list_files_using_path(base_path):
     image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
-    file_list = tf.io.gfile.glob(base_path.decode('utf-8') + '/*')
+    file_list = tf.io.gfile.glob(base_path + '/*')
     image_files = [file for file in file_list if any(file.lower().endswith(ext) for ext in image_extensions)]
     return image_files
 
-# needs to be updated
-def generate_dataset(base_path, total_classes, image_size, grid_size, anchors, batch_size=32):
-    if tf.is_tensor(base_path):
-        base_path = base_path.numpy()
-    def x(path):
-        return get_x(path=path,image_size=image_size)
-
-    def y(path):
-        return get_y(path=path,total_classes=total_classes, image_size=image_size, anchors=anchors, grid_size=grid_size)
-
-    def parse_data(x_path, y_path):
-        x_data = x(x_path)
-        y_data = y(y_path)
-        return x_data, y_data
-    
+# main function that generates dataset
+def generate_dataset(base_path, total_classes, image_size, anchors, batch_size=32):
+    grid_sizes=tf.convert_to_tensor([28.0,14.0,7.0])
     paths = list_files_using_path(base_path)
-    dataset = tf.data.Dataset.from_tensor_slices(paths)
-    dataset = dataset.map(lambda x_path: tf.py_function(parse_data, [x_path, x_path], [tf.float32, tf.float32]),
-                           num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    dataset = dataset.batch(batch_size).prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+
+    x_train = tf.convert_to_tensor([get_x(path=path,image_size=image_size) for path in paths])
+    y1_train = tf.convert_to_tensor([get_y(path=path,total_classes=total_classes, image_size=image_size, anchors=anchors, grid_size=grid_sizes[0]) for path in paths])
+    y2_train = tf.convert_to_tensor([get_y(path=path,total_classes=total_classes, image_size=image_size, anchors=anchors, grid_size=grid_sizes[1]) for path in paths])
+    y3_train = tf.convert_to_tensor([get_y(path=path,total_classes=total_classes, image_size=image_size, anchors=anchors, grid_size=grid_sizes[2]) for path in paths])
+    dataset = tf.data.Dataset.from_tensor_slices((x_train, {'y1': y1_train, 'y2': y2_train, 'y3': y3_train}))
+
+    dataset = dataset.shuffle(buffer_size=len(x_train)).batch(batch_size)
     return dataset
