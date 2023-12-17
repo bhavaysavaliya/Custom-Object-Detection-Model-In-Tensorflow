@@ -84,3 +84,11 @@ def get_model(num_classes,num_anchors,model_path=None):
 
     model = Model(inputs=input,outputs = [D1,D2,D3])
     return model
+
+def predict(model,image):
+    img = tf.expand_dims(tf.convert_to_tensor(image,dtype=tf.float32)/255.0,axis=0)
+    op0,op1,op2 = model.predict(img)
+    op0 = tf.squeeze(op0)
+    op1 = tf.squeeze(op1)
+    op2 = tf.squeeze(op2)
+    return [op0,op1,op2]
