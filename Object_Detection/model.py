@@ -4,16 +4,16 @@ from keras.layers import Input,UpSampling2D
 from keras.models import Model,load_model
 
 
-def get_model(num_classes,num_anchors,model_path=None):
+def get_model(num_classes=0,num_anchors=0,model_path=None):
+    if model_path is not None:
+        custom_objects = {'YoloConvLayer': YoloConvLayer,'YoloC2FLayer': YoloC2FLayer,'YoloSPPFLayer': YoloSPPFLayer,'YoloBottleneckLayer': YoloBottleneckLayer}
+        model = load_model("model.keras",custom_objects=custom_objects,safe_mode=False)
+        return model
+    
     if num_classes<=0:
         raise ValueError("invalid number of classes, classes should be greater than 0")
     if num_anchors<=0:
         raise ValueError("Invalid number of anchors, anchors should be greater than 0")
-    
-    if model_path is not None:
-        custom_objects = {'YoloConvLayer': YoloConvLayer,'YoloC2FLayer': YoloC2FLayer,'YoloSPPFLayer': YoloSPPFLayer,'YoloBottleneckLayer': YoloBottleneckLayer}
-        model = load_model("model.keras",custom_objects=custom_objects)
-        return model
     
     act = "sigmoid"
     if num_classes>1:
