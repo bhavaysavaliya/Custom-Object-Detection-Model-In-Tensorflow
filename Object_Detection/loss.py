@@ -16,7 +16,7 @@ class YoloLoss(Loss):
         self.lambda_noobj = 10
         self.lambda_obj = 1
         self.lambda_box = 10
-        self.num_anchors=len(anchors_norm)
+        self.num_anchors=anchors_norm.shape[0]
 
     def transform_to_bbox(self,input_tensor,anchor_box_size):
         x_and_y = tf.sigmoid(input_tensor[...,0:2])
