@@ -29,8 +29,9 @@ class YoloLoss(Loss):
         return mse(y_true[...,0:1][noobj],y_pred[...,0:1][noobj])
 
     def class_loss(self,y_true,y_pred):
-        softmax_tensor2 = tf.nn.softmax(y_pred[5:])
-        cross_entropy = tf.reduce_sum(-1.0*y_true[...,5:] * tf.math.log(1e-16+softmax_tensor2))
+        obj = tf.equal(y_true[...,0],1.0)
+        softmax_tensor2 = tf.nn.softmax(y_pred[5:][obj])
+        cross_entropy = tf.reduce_sum(-1.0*y_true[...,5:][obj] * tf.math.log(1e-16+softmax_tensor2))
         return cross_entropy
     
     def box_loss(self,y_true,y_pred,anchor_box_size):
