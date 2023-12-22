@@ -42,45 +42,9 @@ def get_model(num_classes=0,num_anchors=0,model_path=None):
     P19 = YoloConvLayer(k=3,s=2,p=1,c=512,name = "P19")(P18)
     P20 = tf.concat([P9,P19],axis=3)
 
-    
-    P15_temp = P15
-    layer_1 = []
-    for i in range(num_anchors):
-        P15_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=1, activation="sigmoid", name=f"1{i+1}1")(P15_temp)
-        layer_1.append(P15_temp)
-        P15_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=4, activation="relu", name=f"1{i+1}2")(P15_temp)
-        layer_1.append(P15_temp)
-        P15_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=num_classes, activation=act, name=f"1{i+1}3")(P15_temp)
-        layer_1.append(P15_temp)
-    concatenate_1 = tf.keras.layers.Concatenate(axis=3)(layer_1)
-    D1 = Lambda(lambda x: x, name="y1")(concatenate_1)
-
-
-    P18_temp = P18
-    layer_2 = []
-    for i in range(num_anchors):
-        P18_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=1, activation="sigmoid", name=f"2{i+1}1")(P18_temp)
-        layer_2.append(P18_temp)
-        P18_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=4, activation="relu", name=f"2{i+1}2")(P18_temp)
-        layer_2.append(P18_temp)
-        P18_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=num_classes, activation=act, name=f"2{i+1}3")(P18_temp)
-        layer_2.append(P18_temp)
-    concatenate_2 = tf.keras.layers.Concatenate(axis=3)(layer_2)
-    D2 = Lambda(lambda x: x, name="y2")(concatenate_2)
-
-
-    P20_temp = P20
-    layer_3 = []
-    for i in range(num_anchors):
-        P20_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=1, activation="sigmoid", name=f"3{i+1}1")(P20_temp)
-        layer_3.append(P20_temp)
-        P20_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=4, activation="relu", name=f"3{i+1}2")(P20_temp)
-        layer_3.append(P20_temp)
-        P20_temp = Conv2D(kernel_size=1, strides=1, padding="valid", filters=num_classes, activation=act, name=f"3{i+1}3")(P20_temp)
-        layer_3.append(P20_temp)
-    concatenate_3 = tf.keras.layers.Concatenate(axis=3)(layer_3)
-    D3 = Lambda(lambda x: x, name="y3")(concatenate_3)
-
+    D1 = YoloConvLayer(k=1,s=1,p=0,c=(num_classes+5)*num_anchors,name='y1')(P15)
+    D2 = YoloConvLayer(k=1,s=1,p=0,c=(num_classes+5)*num_anchors,name='y2')(P18)
+    D3 = YoloConvLayer(k=1,s=1,p=0,c=(num_classes+5)*num_anchors,name='y3')(P20)
 
     model = Model(inputs=input,outputs = [D1,D2,D3])
     return model
