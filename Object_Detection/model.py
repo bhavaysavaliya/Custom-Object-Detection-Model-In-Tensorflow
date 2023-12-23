@@ -7,7 +7,7 @@ from keras.models import Model,load_model
 def get_model(num_classes=0,num_anchors=0,model_path=None):
     if model_path is not None:
         custom_objects = {'YoloConvLayer': YoloConvLayer,'YoloC2FLayer': YoloC2FLayer,'YoloSPPFLayer': YoloSPPFLayer,'YoloBottleneckLayer': YoloBottleneckLayer}
-        model = load_model("model.keras",custom_objects=custom_objects,safe_mode=False)
+        model = load_model(model_path,custom_objects=custom_objects)
         return model
     
     if num_classes<=0:
