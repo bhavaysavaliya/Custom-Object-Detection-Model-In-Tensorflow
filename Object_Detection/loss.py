@@ -28,7 +28,7 @@ class YoloLoss(Loss):
     def box_loss(self, y_true, y_pred, anchor_box_size):
         obj = tf.equal(y_true[..., 0], 1.0)
         box_preds = self.transform_to_bbox(input_tensor=y_pred[..., 1:5][obj], anchor_box_size=anchor_box_size)
-        return self.mse(y_true[..., 1:5], box_preds)
+        return self.mse(y_true[..., 1:5][obj], box_preds)
 
     def obj_loss(self, y_true, y_pred, anchor_box_size):
         obj = tf.equal(y_true[..., 0], 1.0)

@@ -46,7 +46,7 @@ def get_model(num_classes=0,num_anchors=0,model_path=None):
     D2 = YoloConvLayer(k=1,s=1,p=0,c=(num_classes+5)*num_anchors,name='y2')(P18)
     D3 = YoloConvLayer(k=1,s=1,p=0,c=(num_classes+5)*num_anchors,name='y3')(P20)
 
-    model = Model(inputs=input,outputs = [D1,D2,D3])
+    model = Model(inputs=input,outputs = {'y1':D1,'y2':D2,'y3':D3})
     return model
 
 def predict(model,image):
