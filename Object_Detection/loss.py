@@ -50,3 +50,12 @@ class YoloLoss(Loss):
                 + self.obj_loss(y_pred=pred[i], y_true=truth[i], anchor_box_size=self.anchors[i])
             )
         return loss
+    
+    def get_config(self):
+        return {
+            'anchors': self.anchors.tolist()
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(anchors=tf.constant(config['anchors']))
