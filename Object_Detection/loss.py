@@ -53,7 +53,7 @@ class YoloLoss(Loss):
     
     def get_config(self):
         return {
-            'anchors': self.anchors.tolist()
+            'anchors': self.anchors.numpy().tolist()
         }
 
     @classmethod
